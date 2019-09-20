@@ -1,5 +1,4 @@
 import requests
-import numpy as np
 from bs4 import BeautifulSoup
 from collections import Counter
 
@@ -60,31 +59,8 @@ def save_to_file(content):
         f.write(content + '\n')
 
 def read_file():
-    filename = 'ssq.txt' # txt文件和当前脚本在同一目录下，所以不用写具体路径
-    dates = []
-    terms = []
-    red_one = []
-    red_two = []
-    red_three = []
-    red_four = []
-    red_five = []
-    red_six = []
-    blue_one = []
-    with open(filename, 'r') as file_to_read:
-        while True:
-            lines = file_to_read.readline() # 整行读取数据
-            if not lines:
-                break
-            pass
-            # , red1, red2, red3, red4, red5, red6, blue1
-            date, term = [float(i) for i in lines.split(',')] # 将整行数据分割处理，如果分割符是空格，括号里就不用传入参数，如果是逗号， 则传入‘，'字符。
-            dates.append(date)  # 添加新读取的数据
-            terms.append(term)
-            pass
-            dates = np.array(dates) # 将数据从list类型转换为array类型。
-            terms = np.array(terms)
-            pass
-    return dates, terms, red_one, red_two, red_three, red_four, red_five, red_six, blue_one
+    
+    return red1, red2, red3, red4, red5, red6, blue1
 
 def predict(red_num, blue_num):
 
