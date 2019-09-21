@@ -1,6 +1,10 @@
 from collections import Counter
-
+# 数学工具
 import numpy as np
+# 画图工具-单数组的概率密度分布
+import seaborn as sns
+# 原始画图工具，可以自己指定x,y
+import matplotlib.pyplot as plt
 import requests
 from bs4 import BeautifulSoup
 
@@ -170,12 +174,41 @@ def predict(red_num, blue_num):
     red_sorted = sorted(red_count.items(), key=lambda x: x[0], reverse=False)
     blue_sorted = sorted(blue_count.items(), key=lambda x: x[0], reverse=False)
     # 计算归一化概率
-    x_red = list(map(lambda x: x[0], red_sorted))
-    x_blue = list(map(lambda x: x[0], blue_sorted))
+    x_red = list(map(lambda x: "r" + x[0], red_sorted))
+    x_red_int = list(map(lambda x: int(x[0]), red_sorted))
+    x_blue = list(map(lambda x: "b" + x[0], blue_sorted))
+    x_blue_int = list(map(lambda x: int(x[0]), blue_sorted))
     red_rate = list(map(lambda x: x[1] * 100 / total_red, red_sorted))
     blue_rate = list(map(lambda x: x[1] * 100 / total_blue, blue_sorted))
     print(red_rate)
     print(blue_rate)
+
+    # =================================================
+    # 只能纯数字-画绘制核密度估计（KDE）KDE（Kernel density estimation）是核密度估计的意思，它用来估计随机变量的概率密度函数，可以将数据变得更平缓。
+    # sns.set_style('darkgrid')
+    # sns.distplot(red_rate)
+    # sns.distplot(blue_rate)
+
+    # =================================================
+    #  matplotlib.axes.Axes.hist() 方法的接口，直方图是用面积表示各组频数的多少，矩形的高度表示每一组的频数或频率，宽度则表示各组的组距，因此其高度与宽度均有意义。
+    # n, bins, patches = plt.hist(x=red_num, bins='auto', color='#0504aa',
+    #                             alpha=0.7, rwidth=0.85)
+    # plt.grid(axis='y', alpha=0.75)
+    # plt.xlabel('Value')
+    # plt.ylabel('Frequency')
+    # plt.title('My Very Own Histogram')
+    # plt.text(23, 45, r'$\mu=15, b=3$')
+    # maxfreq = n.max()
+    # # 设置y轴的上限
+    # plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
+
+    # 画条形图：条形图是用条形的长度表示各类别频数的多少，其宽度（表示类别）则是固定的；
+    plt.bar(np.append(x_red, x_blue), np.append(red_rate, blue_rate), label='graph 1')
+    plt.legend()
+    plt.xlabel('number')
+    plt.ylabel('rate')
+    plt.title('test')
+    plt.show()
 
 
 if __name__ == '__main__':
