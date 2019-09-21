@@ -1,10 +1,10 @@
 from collections import Counter
-# 数学工具
-import numpy as np
+
 # 画图工具-单数组的概率密度分布
-import seaborn as sns
 # 原始画图工具，可以自己指定x,y
 import matplotlib.pyplot as plt
+# 数学工具
+import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
@@ -173,7 +173,7 @@ def predict(red_num, blue_num):
     total_blue = len(blue_num)
     red_sorted = sorted(red_count.items(), key=lambda x: x[0], reverse=False)
     blue_sorted = sorted(blue_count.items(), key=lambda x: x[0], reverse=False)
-    # 计算归一化概率
+    # 计算归一化总概率
     x_red = list(map(lambda x: "r" + x[0], red_sorted))
     x_red_int = list(map(lambda x: int(x[0]), red_sorted))
     x_blue = list(map(lambda x: "b" + x[0], blue_sorted))
@@ -210,6 +210,18 @@ def predict(red_num, blue_num):
     plt.title('test')
     plt.show()
 
+    return red_rate, blue_rate, x_red, x_blue
+
+
+# 比较数组每个元素之间的方差
+def variance(source, target):
+    diffs = []
+    for index, source_element in enumerate(source):
+        target_element = target[index]
+        diffs.append(source_element - target_element)
+        pass
+    return diffs
+
 
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
@@ -236,4 +248,32 @@ if __name__ == '__main__':
     red_num = np.append(red_num, red6s)
     blue_num = blue1s
     # 分析数据并预测未来的开奖信息
-    predict(red_num, blue_num)
+    # 分析总概率分布-作为标准
+    red_total_rate, blue_total_rate, x_red, x_blue = predict(red_num, blue_num)
+    print(red_total_rate)
+    print(blue_total_rate)
+    # 分析最近100期的概率分布-作为现实，计算离标准的期望
+    latest_term_num = 100
+    red_latest = np.append(red1s[0:latest_term_num], red2s[0:latest_term_num])
+    red_latest = np.append(red_latest, red3s[0:latest_term_num])
+    red_latest = np.append(red_latest, red4s[0:latest_term_num])
+    red_latest = np.append(red_latest, red5s[0:latest_term_num])
+    red_latest = np.append(red_latest, red6s[0:latest_term_num])
+    blue_latest = blue1s[0:latest_term_num]
+    red_latest_rate, blue_latest_rate, x_red, x_blue = predict(red_latest, blue_latest)
+    print(red_latest_rate)
+    print(blue_latest_rate)
+
+    print("====================")
+    red_diffs = variance(red_latest_rate, red_total_rate)
+    blue_diffs = variance(blue_latest_rate, blue_total_rate)
+    print(red_diffs)
+    print(blue_diffs)
+    # 画条形图：条形图是用条形的长度表示各类别频数的多少，其宽度（表示类别）则是固定的；
+    plt.bar(np.append(x_red, x_blue), np.append(red_diffs, blue_diffs), label='graph 3')
+    plt.legend()
+    plt.xlabel('number')
+    plt.ylabel('rate')
+    plt.title('test')
+    plt.show()
+
