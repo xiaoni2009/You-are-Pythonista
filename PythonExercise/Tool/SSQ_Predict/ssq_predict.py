@@ -201,7 +201,7 @@ def predict(red_num, blue_num):
     # # 设置y轴的上限
     # plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
 
-    draw_bar_pic(np.append(x_red, x_blue),np.append(red_rate, blue_rate),'number','rate','predict','graph 1' )
+    # draw_bar_pic(np.append(x_red, x_blue),np.append(red_rate, blue_rate),'number','rate','predict','graph 1' )
     return red_rate, blue_rate, x_red, x_blue
 
 # get pic
@@ -240,11 +240,42 @@ def max_or_min_n_dict(keys, values, n, if_reverse):
     values_n = values_sorted[0:n]
     print(keys_n)
     # print(values_n)
-    draw_bar_pic(keys_n,values_n,'key','value','max_n_dic' if if_reverse else 'min_n_dic','graph 4')
+    # draw_bar_pic(keys_n,values_n,'key','value','max_n_dic' if if_reverse else 'min_n_dic','graph 4')
     return keys_n,values_n
 
+
+def get_reward(key, times):
+    if "21" or "11" or "01":
+        return 5 * times
+    elif "40" or "31":
+        return 10 * times
+    elif "50" or "41":
+        return 200 * times
+    elif "51":
+        return 3000 * times
+    elif "60":
+        return 50000 * times
+    elif "61":
+        return 5000000 * times
+    else:
+        return 0
+
 def is_win(current_red, current_blue, correct_red, correct_blue):
+    blue_right = 0
+    red_right = 0
+    for i in correct_blue:
+        if i in current_blue:
+            blue_right += 1
+            pass
+    for i in correct_red:
+        if i in current_red:
+            red_right += 1
+        pass
+    print(red_right)
+    print(blue_right)
+    print(get_reward(str(red_right) + str(blue_right),1))
     pass
+
 
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
@@ -293,5 +324,7 @@ if __name__ == '__main__':
     print("====================")
     max_or_min_n_dict(x_blue, blue_diffs, 3,True)
     max_or_min_n_dict(x_blue, blue_diffs, 3,False)
+
+    is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
 
 
