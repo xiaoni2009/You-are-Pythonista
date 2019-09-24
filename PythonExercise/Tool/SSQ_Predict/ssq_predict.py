@@ -69,7 +69,8 @@ def save_to_file(content):
 
 
 def read_file():
-    filename = 'ssq.txt'  # txt文件和当前脚本在同一目录下，所以不用写具体路径
+    # filename = 'ssq.txt'  # txt文件和当前脚本在同一目录下，所以不用写具体路径
+    filename = 'ssq_test.txt'  # txt文件和当前脚本在同一目录下，所以不用写具体路径
     dates = []
     terms = []
     red_one = []
@@ -175,9 +176,7 @@ def predict(red_num, blue_num):
     blue_sorted = sorted(blue_count.items(), key=lambda x: x[0], reverse=False)
     # 计算归一化总概率
     x_red = list(map(lambda x: "r" + x[0], red_sorted))
-    x_red_int = list(map(lambda x: int(x[0]), red_sorted))
     x_blue = list(map(lambda x: "b" + x[0], blue_sorted))
-    x_blue_int = list(map(lambda x: int(x[0]), blue_sorted))
     red_rate = list(map(lambda x: x[1] * 100 / total_red, red_sorted))
     blue_rate = list(map(lambda x: x[1] * 100 / total_blue, blue_sorted))
     print(red_rate)
@@ -202,16 +201,19 @@ def predict(red_num, blue_num):
     # # 设置y轴的上限
     # plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
 
-    # 画条形图：条形图是用条形的长度表示各类别频数的多少，其宽度（表示类别）则是固定的；
-    plt.bar(np.append(x_red, x_blue), np.append(red_rate, blue_rate), label='graph 1')
-    plt.legend()
-    plt.xlabel('number')
-    plt.ylabel('rate')
-    plt.title('test')
-    plt.show()
-
+    draw_bar_pic(np.append(x_red, x_blue),np.append(red_rate, blue_rate),'number','rate','predict','graph 1' )
     return red_rate, blue_rate, x_red, x_blue
 
+# get pic
+def draw_bar_pic(x, y, x_title, y_title, title, label_name):
+    print("====================")
+    # 画条形图：条形图是用条形的长度表示各类别频数的多少，其宽度（表示类别）则是固定的；
+    plt.bar(x, y, label=label_name)
+    plt.legend()
+    plt.xlabel(x_title)
+    plt.ylabel(y_title)
+    plt.title(title)
+    plt.show()
 
 # 比较数组每个元素之间的方差
 def variance(source, target):
@@ -222,6 +224,27 @@ def variance(source, target):
         pass
     return diffs
 
+# get maximum or minimum n number key-value
+# if_reverse = True, maximum; if_reverse = False, minimum
+def max_or_min_n_dict(keys, values, n, if_reverse):
+    data_map={}
+    for index in range(len(keys)):
+        data_map[keys[index]] = values[index]
+        pass
+    # print(data_map)
+    # reverse sort
+    data_sorted = sorted(data_map.items(), key=lambda x: x[1], reverse=if_reverse)
+    keys_sorted = list(map(lambda x: x[0], data_sorted))
+    values_sorted = list(map(lambda x: x[1], data_sorted))
+    keys_n = keys_sorted[0:n]
+    values_n = values_sorted[0:n]
+    print(keys_n)
+    # print(values_n)
+    draw_bar_pic(keys_n,values_n,'key','value','max_n_dic' if if_reverse else 'min_n_dic','graph 4')
+    return keys_n,values_n
+
+def is_win(current_red, current_blue, correct_red, correct_blue):
+    pass
 
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
@@ -231,16 +254,6 @@ if __name__ == '__main__':
     # pparser()
 
     dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s = read_file()
-    print(dates)
-    print(terms)
-    print(red1s)
-    print(red2s)
-    print(red3s)
-    print(red4s)
-    print(red5s)
-    print(red6s)
-    print(reds)
-    print(blue1s)
     red_num = np.append(red1s, red2s)
     red_num = np.append(red_num, red3s)
     red_num = np.append(red_num, red4s)
@@ -261,19 +274,24 @@ if __name__ == '__main__':
     red_latest = np.append(red_latest, red6s[0:latest_term_num])
     blue_latest = blue1s[0:latest_term_num]
     red_latest_rate, blue_latest_rate, x_red, x_blue = predict(red_latest, blue_latest)
-    print(red_latest_rate)
-    print(blue_latest_rate)
+    # print(red_latest_rate)
+    # print(blue_latest_rate)
 
     print("====================")
     red_diffs = variance(red_latest_rate, red_total_rate)
     blue_diffs = variance(blue_latest_rate, blue_total_rate)
-    print(red_diffs)
-    print(blue_diffs)
-    # 画条形图：条形图是用条形的长度表示各类别频数的多少，其宽度（表示类别）则是固定的；
-    plt.bar(np.append(x_red, x_blue), np.append(red_diffs, blue_diffs), label='graph 3')
-    plt.legend()
-    plt.xlabel('number')
-    plt.ylabel('rate')
-    plt.title('test')
-    plt.show()
+    # print(red_diffs)
+    # print(blue_diffs)
+    draw_bar_pic(np.append(x_red, x_blue),np.append(red_diffs, blue_diffs),'number','rate','variance','graph 3' )
+
+    print("====================")
+    # keys = [1,2,3]
+    # values = ["a","b","c"]
+    # max_n_dict(keys, values, 1)
+    max_or_min_n_dict(x_red, red_diffs, 6, True)
+    max_or_min_n_dict(x_red, red_diffs, 6, False)
+    print("====================")
+    max_or_min_n_dict(x_blue, blue_diffs, 3,True)
+    max_or_min_n_dict(x_blue, blue_diffs, 3,False)
+
 
