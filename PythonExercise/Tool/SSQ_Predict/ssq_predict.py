@@ -8,6 +8,8 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
+latest_red_right = ["02","13","15","17","26","33"]
+latest_blue_right = ["01"]
 
 def pparser():
     # 发起请求
@@ -151,6 +153,7 @@ def predict(red_num, blue_num):
     blue1 = list(map(lambda x: x[0], blue))
     red1.sort()
     blue1.sort()
+    is_win(red1, blue1, latest_red_right, latest_blue_right)
     print('号码低频-1注：' + str(red1) + ' | ' + blue1[0])
     print('号码低频-2注：' + str(red1) + ' | ' + blue1[1])
     print('号码低频-3注：' + str(red1) + ' | ' + blue1[2])
@@ -165,6 +168,7 @@ def predict(red_num, blue_num):
     blue2 = list(map(lambda x: x[0], blue))
     red2.sort()
     blue2.sort()
+    is_win(red1, blue1, latest_red_right, latest_blue_right)
     print('号码高频-1注：' + str(red2) + ' | ' + blue2[0])
     print('号码高频-2注：' + str(red2) + ' | ' + blue2[1])
     print('号码高频-3注：' + str(red2) + ' | ' + blue2[2])
@@ -319,12 +323,13 @@ if __name__ == '__main__':
     # keys = [1,2,3]
     # values = ["a","b","c"]
     # max_n_dict(keys, values, 1)
-    max_or_min_n_dict(x_red, red_diffs, 6, True)
-    max_or_min_n_dict(x_red, red_diffs, 6, False)
+    max_n_red_keys, max_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, True)
+    min_n_red_keys, min_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, False)
     print("====================")
-    max_or_min_n_dict(x_blue, blue_diffs, 3,True)
-    max_or_min_n_dict(x_blue, blue_diffs, 3,False)
+    max_n_blue_keys, max_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3,True)
+    min_n_blue_keys, min_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3,False)
 
-    is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
+    # is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
+    is_win(np.append(max_n_red_keys, min_n_red_keys),np.append(max_n_blue_keys, min_n_blue_keys),["01","23"],["02"])
 
 
