@@ -8,8 +8,28 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
-latest_red_right = ["02","13","15","17","26","33"]
+latest_red_right = ["03","12","14","17","23","27"]
 latest_blue_right = ["01"]
+
+def get_reward(key, times):
+    x = 0
+    if key == "00":
+        x = 0
+    elif key == "21" or key == "11" or key == "01":
+        x = 5 * times
+    elif key == "40" or key == "31":
+        x = 10 * times
+    elif key == "50" or key == "41":
+        x = 200 * times
+    elif key == "51":
+        x = 3000 * times
+    elif key == "60":
+        x = 50000 * times
+    elif key == "61":
+        x = 5000000 * times
+    else:
+        x = 0
+    return x
 
 def pparser():
     # 发起请求
@@ -153,7 +173,7 @@ def predict(red_num, blue_num):
     blue1 = list(map(lambda x: x[0], blue))
     red1.sort()
     blue1.sort()
-    is_win(red1, blue1, latest_red_right, latest_blue_right)
+    # is_win(red1, blue1, latest_red_right, latest_blue_right)
     print('号码低频-1注：' + str(red1) + ' | ' + blue1[0])
     print('号码低频-2注：' + str(red1) + ' | ' + blue1[1])
     print('号码低频-3注：' + str(red1) + ' | ' + blue1[2])
@@ -168,10 +188,10 @@ def predict(red_num, blue_num):
     blue2 = list(map(lambda x: x[0], blue))
     red2.sort()
     blue2.sort()
-    is_win(red1, blue1, latest_red_right, latest_blue_right)
     print('号码高频-1注：' + str(red2) + ' | ' + blue2[0])
     print('号码高频-2注：' + str(red2) + ' | ' + blue2[1])
     print('号码高频-3注：' + str(red2) + ' | ' + blue2[2])
+    is_win(np.append(red1,red2), np.append(blue1,blue2), latest_red_right, latest_blue_right)
     print('------------------------------------------------------------------------------')
     # 按照数字(非次数)升序排序
     total_red = len(red_num)
@@ -248,21 +268,7 @@ def max_or_min_n_dict(keys, values, n, if_reverse):
     return keys_n,values_n
 
 
-def get_reward(key, times):
-    if "21" or "11" or "01":
-        return 5 * times
-    elif "40" or "31":
-        return 10 * times
-    elif "50" or "41":
-        return 200 * times
-    elif "51":
-        return 3000 * times
-    elif "60":
-        return 50000 * times
-    elif "61":
-        return 5000000 * times
-    else:
-        return 0
+
 
 def is_win(current_red, current_blue, correct_red, correct_blue):
     blue_right = 0
@@ -280,6 +286,12 @@ def is_win(current_red, current_blue, correct_red, correct_blue):
     print(get_reward(str(red_right) + str(blue_right),1))
     pass
 
+def add_prefix(list_data, prefix_str):
+    b = []
+    for ele in list_data:
+        ele = prefix_str + ele
+        b.append(ele)
+    return b
 
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
@@ -330,6 +342,6 @@ if __name__ == '__main__':
     min_n_blue_keys, min_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3,False)
 
     # is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
-    is_win(np.append(max_n_red_keys, min_n_red_keys),np.append(max_n_blue_keys, min_n_blue_keys),["01","23"],["02"])
+    is_win(np.append(max_n_red_keys, min_n_red_keys),np.append(max_n_blue_keys, min_n_blue_keys),add_prefix(latest_red_right, "r"),add_prefix(latest_blue_right, "b"))
 
 
