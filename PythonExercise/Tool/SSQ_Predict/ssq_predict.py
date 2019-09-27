@@ -8,8 +8,8 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
-latest_red_right = ["03","12","14","17","23","27"]
-latest_blue_right = ["01"]
+latest_red_right = ["01","05","19","21","25","33"]
+latest_blue_right = ["15"]
 
 def get_reward(key, times):
     x = 0
