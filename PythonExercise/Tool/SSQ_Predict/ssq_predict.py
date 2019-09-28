@@ -8,9 +8,6 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
-latest_red_right = ["04", "12", "14", "21", "27", "29"]
-latest_blue_right = ["12"]
-
 
 def get_reward(key, times):
     x = 0
@@ -159,12 +156,78 @@ def read_file():
         pass
     return dates, terms, red_one, red_two, red_three, red_four, red_five, red_six, red_all, blue_one
 
+def check_num(num, keys, count_data):
+    dict_data = dict(count_data)
+    if num not in keys:
+        dict_data.update({num:0})
+    return dict_data
 
-def predict(red_num, blue_num):
+def predict(red_num, blue_num, correct_red, correct_blue):
     red_count = Counter(red_num)
     blue_count = Counter(blue_num)
     print(red_count)
     print(blue_count)
+    # 有可能某个数字没出现过，为保证长度一致，需要对没出现过的数字的Counter的key进行补全
+    red_key_sorted = sorted(red_count.items(), key=lambda x: x[0], reverse=False)
+    if len(red_key_sorted) < 33:
+        # 对红球补全
+        red_keys = list(map(lambda x: x[0], red_count.items()))
+        red_count = check_num("01", red_keys, red_count)
+        red_count = check_num("02", red_keys, red_count)
+        red_count = check_num("03", red_keys, red_count)
+        red_count = check_num("04", red_keys, red_count)
+        red_count = check_num("05", red_keys, red_count)
+        red_count = check_num("06", red_keys, red_count)
+        red_count = check_num("07", red_keys, red_count)
+        red_count = check_num("08", red_keys, red_count)
+        red_count = check_num("09", red_keys, red_count)
+        red_count = check_num("10", red_keys, red_count)
+        red_count = check_num("11", red_keys, red_count)
+        red_count = check_num("12", red_keys, red_count)
+        red_count = check_num("13", red_keys, red_count)
+        red_count = check_num("14", red_keys, red_count)
+        red_count = check_num("15", red_keys, red_count)
+        red_count = check_num("16", red_keys, red_count)
+        red_count = check_num("17", red_keys, red_count)
+        red_count = check_num("18", red_keys, red_count)
+        red_count = check_num("19", red_keys, red_count)
+        red_count = check_num("20", red_keys, red_count)
+        red_count = check_num("21", red_keys, red_count)
+        red_count = check_num("22", red_keys, red_count)
+        red_count = check_num("23", red_keys, red_count)
+        red_count = check_num("24", red_keys, red_count)
+        red_count = check_num("25", red_keys, red_count)
+        red_count = check_num("26", red_keys, red_count)
+        red_count = check_num("27", red_keys, red_count)
+        red_count = check_num("28", red_keys, red_count)
+        red_count = check_num("29", red_keys, red_count)
+        red_count = check_num("30", red_keys, red_count)
+        red_count = check_num("31", red_keys, red_count)
+        red_count = check_num("32", red_keys, red_count)
+        red_count = check_num("33", red_keys, red_count)
+        pass
+    blue_key_sorted = sorted(blue_count.items(), key=lambda x: x[0], reverse=False)
+    if len(blue_key_sorted) < 16:
+        # 对篮球补全
+        blue_keys = list(map(lambda x: x[0], blue_count.items()))
+        blue_count = check_num("01", blue_keys, blue_count)
+        blue_count = check_num("02", blue_keys, blue_count)
+        blue_count = check_num("03", blue_keys, blue_count)
+        blue_count = check_num("04", blue_keys, blue_count)
+        blue_count = check_num("05", blue_keys, blue_count)
+        blue_count = check_num("06", blue_keys, blue_count)
+        blue_count = check_num("07", blue_keys, blue_count)
+        blue_count = check_num("08", blue_keys, blue_count)
+        blue_count = check_num("09", blue_keys, blue_count)
+        blue_count = check_num("10", blue_keys, blue_count)
+        blue_count = check_num("11", blue_keys, blue_count)
+        blue_count = check_num("12", blue_keys, blue_count)
+        blue_count = check_num("13", blue_keys, blue_count)
+        blue_count = check_num("14", blue_keys, blue_count)
+        blue_count = check_num("15", blue_keys, blue_count)
+        blue_count = check_num("16", blue_keys, blue_count)
+        pass
+
     print('------------------------------------------------------------------------------')
     # 按照出现频率倒序
     # python 使用 lambda 来创建匿名函数lambda [arg1 [,arg2,.....argn]]:expression
@@ -196,7 +259,7 @@ def predict(red_num, blue_num):
     print('号码高频-1注：' + str(red2) + ' | ' + blue2[0])
     print('号码高频-2注：' + str(red2) + ' | ' + blue2[1])
     print('号码高频-3注：' + str(red2) + ' | ' + blue2[2])
-    total_reword = is_win(np.append(red1, red2), np.append(blue1, blue2), latest_red_right, latest_blue_right)
+    total_reword = is_win(np.append(red1, red2), np.append(blue1, blue2), correct_red, correct_blue)
     print('------------------------------------------------------------------------------')
     # 按照数字(非次数)升序排序
     total_red = len(red_num)
@@ -234,23 +297,24 @@ def predict(red_num, blue_num):
     return red_rate, blue_rate, x_red, x_blue, total_reword
 
 
-def predict_latest(red1s, red2s, red3s, red4s, red5s, red6s, blue1s, latest_term_num):
+def predict_latest(red1s, red2s, red3s, red4s, red5s, red6s, blue1s, latest_term_num, correct_red, correct_blue):
     red_latest = np.append(red1s[0:latest_term_num], red2s[0:latest_term_num])
     red_latest = np.append(red_latest, red3s[0:latest_term_num])
     red_latest = np.append(red_latest, red4s[0:latest_term_num])
     red_latest = np.append(red_latest, red5s[0:latest_term_num])
     red_latest = np.append(red_latest, red6s[0:latest_term_num])
     blue_latest = blue1s[0:latest_term_num]
-    return predict(red_latest, blue_latest)
+    return predict(red_latest, blue_latest, correct_red, correct_blue)
 
 
-def predic_latest_total_diffs(red_latest_rate, red_total_rate,blue_latest_rate, blue_total_rate,x_red, x_blue):
+def predic_latest_total_diffs(red_latest_rate, red_total_rate, blue_latest_rate, blue_total_rate, x_red, x_blue,
+                              correct_red, correct_blue):
     print("====================")
     red_diffs = variance(red_latest_rate, red_total_rate)
     blue_diffs = variance(blue_latest_rate, blue_total_rate)
     # print(red_diffs)
     # print(blue_diffs)
-    draw_bar_pic(np.append(x_red, x_blue), np.append(red_diffs, blue_diffs), 'number', 'rate', 'variance', 'graph 3')
+    # draw_bar_pic(np.append(x_red, x_blue), np.append(red_diffs, blue_diffs), 'number', 'rate', 'variance', 'graph 3')
 
     print("====================")
     # keys = [1,2,3]
@@ -264,7 +328,7 @@ def predic_latest_total_diffs(red_latest_rate, red_total_rate,blue_latest_rate, 
 
     # is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
     diff_reward = is_win(np.append(max_n_red_keys, min_n_red_keys), np.append(max_n_blue_keys, min_n_blue_keys),
-                         add_prefix(latest_red_right, "r"), add_prefix(latest_blue_right, "b"))
+                         add_prefix(correct_red, "r"), add_prefix(correct_blue, "b"))
     return red_diffs, blue_diffs, x_red, x_blue, diff_reward
 
 
@@ -283,9 +347,13 @@ def draw_bar_pic(x, y, x_title, y_title, title, label_name):
 # 比较数组每个元素之间的方差
 def variance(source, target):
     diffs = []
+    print("variance####################")
+    print(source)
+    print(target)
     for index, source_element in enumerate(source):
         target_element = target[index]
-        diffs.append(source_element - target_element)
+        diff = source_element - target_element
+        diffs.append(diff.__str__())
         pass
     return diffs
 
@@ -294,7 +362,13 @@ def variance(source, target):
 # if_reverse = True, maximum; if_reverse = False, minimum
 def max_or_min_n_dict(keys, values, n, if_reverse):
     data_map = {}
+    print("max_or_min_n_dict")
+    print(keys)
+    print(values)
+    print(range(len(keys)))
     for index in range(len(keys)):
+        print(keys[index])
+        print(values[index])
         data_map[keys[index]] = values[index]
         pass
     # print(data_map)
@@ -323,8 +397,10 @@ def is_win(current_red, current_blue, correct_red, correct_blue):
         pass
     print(red_right)
     print(blue_right)
-    print(get_reward(str(red_right) + str(blue_right), 1))
+    reward = get_reward(str(red_right) + str(blue_right), 1)
+    print(reward)
     pass
+    return reward
 
 
 def add_prefix(list_data, prefix_str):
@@ -334,7 +410,9 @@ def add_prefix(list_data, prefix_str):
         b.append(ele)
     return b
 
-def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s):
+
+def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s, correct_red, correct_blue,
+                        correct_date, correct_term):
     red_num = np.append(red1s, red2s)
     red_num = np.append(red_num, red3s)
     red_num = np.append(red_num, red4s)
@@ -343,19 +421,57 @@ def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, 
     blue_num = blue1s
     # 分析数据并预测未来的开奖信息
     # 分析总概率分布-作为标准
-    red_total_rate, blue_total_rate, x_red, x_blue, total_reward = predict(red_num, blue_num)
+    red_total_rate, blue_total_rate, x_red, x_blue, total_reward = predict(red_num, blue_num, correct_red, correct_blue)
     print(red_total_rate)
     print(blue_total_rate)
     # 分析最近100期的概率分布-作为现实，计算离标准的期望
     latest_term_num = 100
     red_latest_rate, blue_latest_rate, x_red1, x_blue1, latest_reward = predict_latest(red1s, red2s, red3s, red4s,
                                                                                        red5s,
-                                                                                       red6s, blue1s, latest_term_num)
+                                                                                       red6s, blue1s, latest_term_num,
+                                                                                       correct_red, correct_blue)
 
     red_diffs, blue_diffs, x_red2, x_blue2, diff_reward = predic_latest_total_diffs(red_latest_rate, red_total_rate,
                                                                                     blue_latest_rate, blue_total_rate,
-                                                                                    x_red, x_blue)
+                                                                                    x_red, x_blue, correct_red,
+                                                                                    correct_blue)
+    append_result_to_file("|" + correct_date + "|" + correct_term + "|" + list_to_str(correct_red) + "," + list_to_str(
+        correct_blue) + "|" + diff_reward.__str__() + "|" + latest_reward.__str__() + "|" + total_reward.__str__() + "|")
 
+
+def list_to_str(list):
+    temp_str = ''
+    for c in list:
+        temp_str += (' ' + c)
+        pass
+    return temp_str
+
+
+def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red_all, blue1s):
+    length = len(red1s)
+    for i in range(length):
+        print(i)
+        correct_red = [red1s[i], red2s[i], red3s[i], red4s[i], red5s[i], red6s[i]]
+        correct_blue = [blue1s[i]]
+        correct_date = dates[i]
+        correct_term = dates[i]
+        remain_index = i + 1
+        # 因为最后需要至少3个蓝球和6红球去估计，差分需要最近100个，所以预留200注作为底数
+        if remain_index > length - 20:
+            break
+        predict_and_compare(dates[remain_index: length], terms[remain_index: length], red1s[remain_index: length],
+                            red2s[remain_index: length], red3s[remain_index: length], red4s[remain_index: length],
+                            red5s[remain_index: length], red6s[remain_index: length], red_all,
+                            blue1s[remain_index: length], correct_red, correct_blue,
+                            correct_date, correct_term)
+        pass
+
+
+def append_result_to_file(content):
+    # a 模式open file,指针在文件末尾，追加写入
+    with open('result.txt', 'a', encoding='utf-8') as f:
+        f.write(content + '\n')
+        f.close()
 
 
 if __name__ == '__main__':
@@ -366,4 +482,4 @@ if __name__ == '__main__':
     # pparser()
 
     dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s = read_file()
-    predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s)
+    write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s)
