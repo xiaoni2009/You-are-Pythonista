@@ -437,6 +437,7 @@ def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, 
                                                                                     correct_blue)
     append_result_to_file("|" + correct_date + "|" + correct_term + "|" + list_to_str(correct_red) + "," + list_to_str(
         correct_blue) + "|" + diff_reward.__str__() + "|" + latest_reward.__str__() + "|" + total_reward.__str__() + "|")
+    return  diff_reward, latest_reward, total_reward
 
 
 def list_to_str(list):
@@ -449,6 +450,11 @@ def list_to_str(list):
 
 def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red_all, blue1s):
     length = len(red1s)
+    all_diff_reward = 0
+    all_latest_reward = 0
+    all_total_reward = 0
+    append_result_to_file("|correct_date|correct_term|correct_red,correct_blue|diff_reward|latest_reward|total_reward|")
+
     for i in range(length):
         print(i)
         correct_red = [red1s[i], red2s[i], red3s[i], red4s[i], red5s[i], red6s[i]]
@@ -459,12 +465,16 @@ def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red
         # 因为最后需要至少3个蓝球和6红球去估计，差分需要最近100个，所以预留200注作为底数
         if remain_index > length - 20:
             break
-        predict_and_compare(dates[remain_index: length], terms[remain_index: length], red1s[remain_index: length],
+        diff_reward, latest_reward, total_reward = predict_and_compare(dates[remain_index: length], terms[remain_index: length], red1s[remain_index: length],
                             red2s[remain_index: length], red3s[remain_index: length], red4s[remain_index: length],
                             red5s[remain_index: length], red6s[remain_index: length], red_all,
                             blue1s[remain_index: length], correct_red, correct_blue,
                             correct_date, correct_term)
+        all_diff_reward += diff_reward
+        all_latest_reward += latest_reward
+        all_total_reward += total_reward
         pass
+    append_result_to_file("| 0 |0 |0,|" + all_diff_reward.__str__() + "|" + all_latest_reward.__str__() + "|" + all_total_reward.__str__() + "|")
 
 
 def append_result_to_file(content):
