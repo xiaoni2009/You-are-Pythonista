@@ -35,6 +35,7 @@ def get_reward(key, times):
 
 def pparser():
     # 发起请求
+    global red_num, blue_num
     basic_url = 'http://kaijiang.zhcw.com/zhcw/html/ssq/list_1.html'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
@@ -59,6 +60,8 @@ def pparser():
         res.encoding = 'utf-8'
         context = res.text
         soups = BeautifulSoup(context, 'html.parser')
+        red_num = []
+        blue_num = []
 
         if soups.table is None:
             continue
@@ -353,6 +356,8 @@ def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, 
                                                                                     blue_latest_rate, blue_total_rate,
                                                                                     x_red, x_blue)
 
+
+
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
     # red_num = []
@@ -361,20 +366,4 @@ if __name__ == '__main__':
     # pparser()
 
     dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s = read_file()
-    red_num = np.append(red1s, red2s)
-    red_num = np.append(red_num, red3s)
-    red_num = np.append(red_num, red4s)
-    red_num = np.append(red_num, red5s)
-    red_num = np.append(red_num, red6s)
-    blue_num = blue1s
-    # 分析数据并预测未来的开奖信息
-    # 分析总概率分布-作为标准
-    red_total_rate, blue_total_rate, x_red, x_blue, total_reward = predict(red_num, blue_num)
-    print(red_total_rate)
-    print(blue_total_rate)
-    # 分析最近100期的概率分布-作为现实，计算离标准的期望
-    latest_term_num = 100
-    red_latest_rate, blue_latest_rate, x_red1, x_blue1, latest_reward = predict_latest(red1s, red2s, red3s, red4s, red5s,
-                                                                                     red6s, blue1s, latest_term_num)
-
-    red_diffs, blue_diffs, x_red2, x_blue2, diff_reward = predic_latest_total_diffs(red_latest_rate, red_total_rate, blue_latest_rate, blue_total_rate, x_red, x_blue)
+    predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s)
