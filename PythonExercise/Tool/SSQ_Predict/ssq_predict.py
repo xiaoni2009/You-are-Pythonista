@@ -8,8 +8,9 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 
-latest_red_right = ["01","05","19","21","25","33"]
-latest_blue_right = ["15"]
+latest_red_right = ["04", "12", "14", "21", "27", "29"]
+latest_blue_right = ["12"]
+
 
 def get_reward(key, times):
     x = 0
@@ -30,6 +31,7 @@ def get_reward(key, times):
     else:
         x = 0
     return x
+
 
 def pparser():
     # 发起请求
@@ -191,7 +193,7 @@ def predict(red_num, blue_num):
     print('号码高频-1注：' + str(red2) + ' | ' + blue2[0])
     print('号码高频-2注：' + str(red2) + ' | ' + blue2[1])
     print('号码高频-3注：' + str(red2) + ' | ' + blue2[2])
-    is_win(np.append(red1,red2), np.append(blue1,blue2), latest_red_right, latest_blue_right)
+    total_reword = is_win(np.append(red1, red2), np.append(blue1, blue2), latest_red_right, latest_blue_right)
     print('------------------------------------------------------------------------------')
     # 按照数字(非次数)升序排序
     total_red = len(red_num)
@@ -226,7 +228,42 @@ def predict(red_num, blue_num):
     # plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
 
     # draw_bar_pic(np.append(x_red, x_blue),np.append(red_rate, blue_rate),'number','rate','predict','graph 1' )
-    return red_rate, blue_rate, x_red, x_blue
+    return red_rate, blue_rate, x_red, x_blue, total_reword
+
+
+def predict_latest(red1s, red2s, red3s, red4s, red5s, red6s, blue1s, latest_term_num):
+    red_latest = np.append(red1s[0:latest_term_num], red2s[0:latest_term_num])
+    red_latest = np.append(red_latest, red3s[0:latest_term_num])
+    red_latest = np.append(red_latest, red4s[0:latest_term_num])
+    red_latest = np.append(red_latest, red5s[0:latest_term_num])
+    red_latest = np.append(red_latest, red6s[0:latest_term_num])
+    blue_latest = blue1s[0:latest_term_num]
+    return predict(red_latest, blue_latest)
+
+
+def predic_latest_total_diffs(red_latest_rate, red_total_rate,blue_latest_rate, blue_total_rate,x_red, x_blue):
+    print("====================")
+    red_diffs = variance(red_latest_rate, red_total_rate)
+    blue_diffs = variance(blue_latest_rate, blue_total_rate)
+    # print(red_diffs)
+    # print(blue_diffs)
+    draw_bar_pic(np.append(x_red, x_blue), np.append(red_diffs, blue_diffs), 'number', 'rate', 'variance', 'graph 3')
+
+    print("====================")
+    # keys = [1,2,3]
+    # values = ["a","b","c"]
+    # max_n_dict(keys, values, 1)
+    max_n_red_keys, max_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, True)
+    min_n_red_keys, min_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, False)
+    print("====================")
+    max_n_blue_keys, max_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3, True)
+    min_n_blue_keys, min_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3, False)
+
+    # is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
+    diff_reward = is_win(np.append(max_n_red_keys, min_n_red_keys), np.append(max_n_blue_keys, min_n_blue_keys),
+                         add_prefix(latest_red_right, "r"), add_prefix(latest_blue_right, "b"))
+    return red_diffs, blue_diffs, x_red, x_blue, diff_reward
+
 
 # get pic
 def draw_bar_pic(x, y, x_title, y_title, title, label_name):
@@ -239,6 +276,7 @@ def draw_bar_pic(x, y, x_title, y_title, title, label_name):
     plt.title(title)
     plt.show()
 
+
 # 比较数组每个元素之间的方差
 def variance(source, target):
     diffs = []
@@ -248,10 +286,11 @@ def variance(source, target):
         pass
     return diffs
 
+
 # get maximum or minimum n number key-value
 # if_reverse = True, maximum; if_reverse = False, minimum
 def max_or_min_n_dict(keys, values, n, if_reverse):
-    data_map={}
+    data_map = {}
     for index in range(len(keys)):
         data_map[keys[index]] = values[index]
         pass
@@ -265,9 +304,7 @@ def max_or_min_n_dict(keys, values, n, if_reverse):
     print(keys_n)
     # print(values_n)
     # draw_bar_pic(keys_n,values_n,'key','value','max_n_dic' if if_reverse else 'min_n_dic','graph 4')
-    return keys_n,values_n
-
-
+    return keys_n, values_n
 
 
 def is_win(current_red, current_blue, correct_red, correct_blue):
@@ -283,8 +320,9 @@ def is_win(current_red, current_blue, correct_red, correct_blue):
         pass
     print(red_right)
     print(blue_right)
-    print(get_reward(str(red_right) + str(blue_right),1))
+    print(get_reward(str(red_right) + str(blue_right), 1))
     pass
+
 
 def add_prefix(list_data, prefix_str):
     b = []
@@ -292,6 +330,28 @@ def add_prefix(list_data, prefix_str):
         ele = prefix_str + ele
         b.append(ele)
     return b
+
+def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s):
+    red_num = np.append(red1s, red2s)
+    red_num = np.append(red_num, red3s)
+    red_num = np.append(red_num, red4s)
+    red_num = np.append(red_num, red5s)
+    red_num = np.append(red_num, red6s)
+    blue_num = blue1s
+    # 分析数据并预测未来的开奖信息
+    # 分析总概率分布-作为标准
+    red_total_rate, blue_total_rate, x_red, x_blue, total_reward = predict(red_num, blue_num)
+    print(red_total_rate)
+    print(blue_total_rate)
+    # 分析最近100期的概率分布-作为现实，计算离标准的期望
+    latest_term_num = 100
+    red_latest_rate, blue_latest_rate, x_red1, x_blue1, latest_reward = predict_latest(red1s, red2s, red3s, red4s,
+                                                                                       red5s,
+                                                                                       red6s, blue1s, latest_term_num)
+
+    red_diffs, blue_diffs, x_red2, x_blue2, diff_reward = predic_latest_total_diffs(red_latest_rate, red_total_rate,
+                                                                                    blue_latest_rate, blue_total_rate,
+                                                                                    x_red, x_blue)
 
 if __name__ == '__main__':
     # 定义两个变量, 用于记录历史开奖信息中的红球、蓝球号码信息
@@ -309,39 +369,12 @@ if __name__ == '__main__':
     blue_num = blue1s
     # 分析数据并预测未来的开奖信息
     # 分析总概率分布-作为标准
-    red_total_rate, blue_total_rate, x_red, x_blue = predict(red_num, blue_num)
+    red_total_rate, blue_total_rate, x_red, x_blue, total_reward = predict(red_num, blue_num)
     print(red_total_rate)
     print(blue_total_rate)
     # 分析最近100期的概率分布-作为现实，计算离标准的期望
     latest_term_num = 100
-    red_latest = np.append(red1s[0:latest_term_num], red2s[0:latest_term_num])
-    red_latest = np.append(red_latest, red3s[0:latest_term_num])
-    red_latest = np.append(red_latest, red4s[0:latest_term_num])
-    red_latest = np.append(red_latest, red5s[0:latest_term_num])
-    red_latest = np.append(red_latest, red6s[0:latest_term_num])
-    blue_latest = blue1s[0:latest_term_num]
-    red_latest_rate, blue_latest_rate, x_red, x_blue = predict(red_latest, blue_latest)
-    # print(red_latest_rate)
-    # print(blue_latest_rate)
+    red_latest_rate, blue_latest_rate, x_red1, x_blue1, latest_reward = predict_latest(red1s, red2s, red3s, red4s, red5s,
+                                                                                     red6s, blue1s, latest_term_num)
 
-    print("====================")
-    red_diffs = variance(red_latest_rate, red_total_rate)
-    blue_diffs = variance(blue_latest_rate, blue_total_rate)
-    # print(red_diffs)
-    # print(blue_diffs)
-    draw_bar_pic(np.append(x_red, x_blue),np.append(red_diffs, blue_diffs),'number','rate','variance','graph 3' )
-
-    print("====================")
-    # keys = [1,2,3]
-    # values = ["a","b","c"]
-    # max_n_dict(keys, values, 1)
-    max_n_red_keys, max_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, True)
-    min_n_red_keys, min_n_red_values = max_or_min_n_dict(x_red, red_diffs, 6, False)
-    print("====================")
-    max_n_blue_keys, max_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3,True)
-    min_n_blue_keys, min_n_blue_values = max_or_min_n_dict(x_blue, blue_diffs, 3,False)
-
-    # is_win(["01","23","08","18"],["15","02"],["01","23"],["02"])
-    is_win(np.append(max_n_red_keys, min_n_red_keys),np.append(max_n_blue_keys, min_n_blue_keys),add_prefix(latest_red_right, "r"),add_prefix(latest_blue_right, "b"))
-
-
+    red_diffs, blue_diffs, x_red2, x_blue2, diff_reward = predic_latest_total_diffs(red_latest_rate, red_total_rate, blue_latest_rate, blue_total_rate, x_red, x_blue)
