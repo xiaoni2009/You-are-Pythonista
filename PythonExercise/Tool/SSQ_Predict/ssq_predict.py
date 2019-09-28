@@ -70,7 +70,6 @@ def pparser():
                 result = row_tds[0].string + ', ' + row_tds[1].string + ', ' + ems[0].string + ' ' + ems[
                     1].string + ' ' + ems[2].string + ' ' + ems[3].string + ' ' + ems[4].string + ' ' + ems[
                              5].string + ', ' + ems[6].string
-                print(result)
 
                 save_to_file(result)
 
@@ -111,18 +110,14 @@ def read_file():
             if not lines:
                 break
             pass
-            print(lines)
             # 将整行数据分割处理，如果分割符是空格，括号里就不用传入参数，如果是逗号， 则传入‘，'字符。
             split_lines = lines.split(',')
-            print(split_lines)
             date = split_lines[0]
             term = split_lines[1]
             red_nums = split_lines[2]
             # 去处换行符
             red_nums = red_nums.replace("\n", "")
-            print(red_nums)
             red_nums_split = red_nums.strip().split(' ')
-            print(red_nums_split)
             # 拆分成红球数字
             red1, red2, red3, red4, red5, red6 = [str(i) for i in red_nums_split]
             blue1 = split_lines[3].strip().replace("\n", "")
@@ -167,8 +162,6 @@ def check_num(num, keys, count_data):
 def predict(red_num, blue_num, correct_red, correct_blue):
     red_count = Counter(red_num)
     blue_count = Counter(blue_num)
-    print(red_count)
-    print(blue_count)
     # 有可能某个数字没出现过，为保证长度一致，需要对没出现过的数字的Counter的key进行补全
     red_key_sorted = sorted(red_count.items(), key=lambda x: x[0], reverse=False)
     if len(red_key_sorted) < 33:
@@ -275,8 +268,6 @@ def predict(red_num, blue_num, correct_red, correct_blue):
     x_blue = list(map(lambda x: x[0], blue_sorted))
     red_rate = list(map(lambda x: x[1] * 100 / total_red, red_sorted))
     blue_rate = list(map(lambda x: x[1] * 100 / total_blue, blue_sorted))
-    print(red_rate)
-    print(blue_rate)
 
     # =================================================
     # 只能纯数字-画绘制核密度估计（KDE）KDE（Kernel density estimation）是核密度估计的意思，它用来估计随机变量的概率密度函数，可以将数据变得更平缓。
@@ -353,9 +344,6 @@ def draw_bar_pic(x, y, x_title, y_title, title, label_name):
 # 比较数组每个元素之间的方差
 def variance(source, target):
     diffs = []
-    print("variance####################")
-    print(source)
-    print(target)
     for index, source_element in enumerate(source):
         target_element = target[index]
         diff = source_element - target_element
@@ -393,6 +381,8 @@ def max_or_min_n_dict(keys, values, n, if_reverse):
 def is_win(current_red, current_blue, correct_red, correct_blue):
     blue_right = 0
     red_right = 0
+    if correct_red is None or correct_blue is None:
+        return 0
     for i in correct_blue:
         if i in current_blue:
             blue_right += 1
@@ -401,10 +391,7 @@ def is_win(current_red, current_blue, correct_red, correct_blue):
         if i in current_red:
             red_right += 1
         pass
-    print(red_right)
-    print(blue_right)
     reward = get_reward(str(red_right) + str(blue_right), 1)
-    print(reward)
     pass
     return reward
 
@@ -419,6 +406,7 @@ def add_prefix(list_data, prefix_str):
 
 def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s, correct_red, correct_blue,
                         correct_date, correct_term):
+
     red_num = np.append(red1s, red2s)
     red_num = np.append(red_num, red3s)
     red_num = np.append(red_num, red4s)
@@ -432,8 +420,6 @@ def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, 
         blue_num,
         correct_red,
         correct_blue)
-    print(red_total_rate)
-    print(blue_total_rate)
     # 分析最近100期的概率分布-作为现实，计算离标准的期望
     latest_term_num = 100
     red_latest_rate, blue_latest_rate, x_red1, x_blue1, latest_reward, latest_predict_reds, latest_predict_blues = predict_latest(
@@ -448,19 +434,63 @@ def predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, 
         x_red, x_blue, correct_red,
         correct_blue)
 
+    print("diff_predict_reds,diff_predict_blues===================================")
+    print(diff_predict_reds)
+    print(diff_predict_blues)
+
     latest_total_common_reward = is_win(get_common_list(total_predict_reds, latest_predict_reds),
-                                         get_common_list(total_predict_blues, latest_predict_blues), correct_red,
-                                         correct_blue)
+                                        get_common_list(total_predict_blues, latest_predict_blues), correct_red,
+                                        correct_blue)
     diff_total_common_reward = is_win(get_common_list(total_predict_reds, diff_predict_reds),
-                                       get_common_list(total_predict_blues, diff_predict_blues), correct_red,
-                                       correct_blue)
+                                      get_common_list(total_predict_blues, diff_predict_blues), correct_red,
+                                      correct_blue)
     diff_latest_common_reward = is_win(get_common_list(latest_predict_reds, diff_predict_reds),
-                                        get_common_list(latest_predict_blues, diff_predict_blues), correct_red,
+                                       get_common_list(latest_predict_blues, diff_predict_blues), correct_red,
+                                       correct_blue)
+
+    latest_total_combine_reward = is_win(combine_list_no_duiplicate(total_predict_reds, latest_predict_reds),
+                                         combine_list_no_duiplicate(total_predict_blues, latest_predict_blues),
+                                         correct_red,
+                                         correct_blue)
+
+    diff_total_combine_reds = combine_list_no_duiplicate(total_predict_reds, diff_predict_reds)
+    diff_total_combine_blues = combine_list_no_duiplicate(total_predict_blues, diff_predict_blues)
+    print("diff_total_combine_reds,diff_total_combine_blues=====================================")
+    print(diff_total_combine_reds)
+    print(diff_total_combine_blues)
+    diff_total_combine_reward = is_win(diff_total_combine_reds,
+                                       diff_total_combine_blues,
+                                       correct_red,
+                                       correct_blue)
+    diff_latest_combine_reward = is_win(combine_list_no_duiplicate(latest_predict_reds, diff_predict_reds),
+                                        combine_list_no_duiplicate(latest_predict_blues, diff_predict_blues),
+                                        correct_red,
                                         correct_blue)
 
+    all_combine_list_no_duiplicate_red = combine_list_no_duiplicate(combine_list_no_duiplicate(latest_predict_reds, diff_predict_reds), total_predict_reds)
+    all_combine_list_no_duiplicate_blue = combine_list_no_duiplicate(combine_list_no_duiplicate(latest_predict_blues, diff_predict_blues),total_predict_blues)
+    print("all_combine_list_no_duiplicate_red,all_combine_list_no_duiplicate_blue==============================")
+    print(all_combine_list_no_duiplicate_red)
+    print(all_combine_list_no_duiplicate_blue)
+    diff_latest_total_combine_reward = is_win(all_combine_list_no_duiplicate_red,
+                                        all_combine_list_no_duiplicate_blue,
+                                        correct_red,
+                                        correct_blue)
+
+    if correct_date is None:
+        correct_date = "-"
+    if correct_term is None:
+        correct_term = "-"
+    if correct_red is None:
+        correct_red = "-"
+    if correct_blue is None:
+        correct_blue = "-"
     append_result_to_file("|" + correct_date + "|" + correct_term + "|" + list_to_str(correct_red) + "," + list_to_str(
-        correct_blue) + "|" + diff_reward.__str__() + "|" + latest_reward.__str__() + "|" + total_reward.__str__() + "|" + latest_total_common_reward.__str__() + "|" + diff_total_common_reward.__str__() + "|" + diff_latest_common_reward.__str__() + "|")
-    return diff_reward, latest_reward, total_reward, latest_total_common_reward, diff_total_common_reward, diff_latest_common_reward
+        correct_blue) + "|" + diff_reward.__str__() + "|" + latest_reward.__str__() + "|" + total_reward.__str__()
+                          + "|" + latest_total_common_reward.__str__() + "|" + diff_total_common_reward.__str__() + "|" + diff_latest_common_reward.__str__() + "|"
+                          + latest_total_combine_reward.__str__() + "|" + diff_total_combine_reward.__str__() + "|" + diff_latest_combine_reward.__str__() + "|"
+                          + diff_latest_total_combine_reward.__str__() + "|")
+    return diff_reward, latest_reward, total_reward, latest_total_common_reward, diff_total_common_reward, diff_latest_common_reward, latest_total_combine_reward, diff_total_combine_reward, diff_latest_combine_reward, diff_latest_total_combine_reward
 
 
 # get same element
@@ -471,6 +501,7 @@ def get_common_list(a_list, b_list):
             result.append(c)
         pass
     return result
+
 
 def combine_list_no_duiplicate(a_list, b_list):
     return list(set(np.append(a_list, b_list)))
@@ -492,11 +523,16 @@ def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red
     all_latest_total_common_reward = 0
     all_diff_total_common_reward = 0
     all_diff_latest_common_reward = 0
+    all_latest_total_combine_reward = 0
+    all_diff_total_combine_reward = 0
+    all_diff_latest_combine_reward = 0
+    all_diff_latest_total_combine_reward = 0
     append_result_to_file(
-        "|correct_date|correct_term|correct_red,correct_blue|diff_reward|latest_reward|total_reward|all_latest_total_common_reward|all_diff_total_common_reward|all_diff_latest_common_reward|")
-    append_result_to_file("|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|")
+        "|correct_date|correct_term|correct_red,correct_blue|diff_reward|latest_reward|total_reward|"
+        "all_latest_total_common_reward|all_diff_total_common_reward|all_diff_latest_common_reward|all_latest_total_combine_reward|all_diff_total_combine_reward|all_diff_latest_combine_reward|all_diff_latest_total_combine_reward|")
+    append_result_to_file(
+        "|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|")
     for i in range(length):
-        print(i)
         correct_red = [red1s[i], red2s[i], red3s[i], red4s[i], red5s[i], red6s[i]]
         correct_blue = [blue1s[i]]
         correct_date = dates[i]
@@ -505,7 +541,7 @@ def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red
         # 因为最后需要至少3个蓝球和6红球去估计，差分需要最近100个，所以预留200注作为底数
         if remain_index > length - 20:
             break
-        diff_reward, latest_reward, total_reward, latest_total_common_reward, diff_total_common_reward, diff_latest_common_reward = predict_and_compare(
+        diff_reward, latest_reward, total_reward, latest_total_common_reward, diff_total_common_reward, diff_latest_common_reward, latest_total_combine_reward, diff_total_combine_reward, diff_latest_combine_reward,diff_latest_total_combine_reward = predict_and_compare(
             dates[remain_index: length],
             terms[remain_index: length],
             red1s[remain_index: length],
@@ -523,9 +559,16 @@ def write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, red
         all_latest_total_common_reward += latest_total_common_reward
         all_diff_total_common_reward += diff_total_common_reward
         all_diff_latest_common_reward += diff_latest_common_reward
+        all_latest_total_combine_reward += latest_total_combine_reward
+        all_diff_total_combine_reward += diff_total_combine_reward
+        all_diff_latest_combine_reward += diff_latest_combine_reward
+        all_diff_latest_total_combine_reward += diff_latest_total_combine_reward
         pass
     append_result_to_file(
-        "| 0 |0 |0,|" + all_diff_reward.__str__() + "|" + all_latest_reward.__str__() + "|" + all_total_reward.__str__() + "|" + all_latest_total_common_reward.__str__() + "|" + all_diff_total_common_reward.__str__() + "|" + all_diff_latest_common_reward.__str__() + "|")
+        "| 0 |0 |0,|" + all_diff_reward.__str__() + "|" + all_latest_reward.__str__() + "|" + all_total_reward.__str__() + "|"
+        + all_latest_total_common_reward.__str__() + "|" + all_diff_total_common_reward.__str__() + "|" + all_diff_latest_common_reward.__str__() + "|"
+        + all_latest_total_combine_reward.__str__() + "|" + all_diff_total_combine_reward.__str__() + "|" + all_diff_latest_combine_reward.__str__() + "|"
+    + all_diff_latest_total_combine_reward.__str__() + "|")
 
 
 def append_result_to_file(content):
@@ -543,4 +586,8 @@ if __name__ == '__main__':
     # pparser()
 
     dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s = read_file()
-    write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s)
+
+    # write_all_result(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s)
+
+    predict_and_compare(dates, terms, red1s, red2s, red3s, red4s, red5s, red6s, reds, blue1s, None, None,
+                        None, None)
